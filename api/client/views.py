@@ -1,4 +1,4 @@
-from typing import List
+from datetime import datetime
 
 from django.shortcuts import get_object_or_404
 from drf_yasg2.utils import swagger_auto_schema
@@ -54,7 +54,8 @@ class ActivePolls(APIView):
 
     @swagger_auto_schema(responses={200: PollSerializer})
     def get(self, request):
-        polls = Poll.objects.all()
+        current_time = datetime.now()
+        polls = Poll.objects.filter(end_time__gte=current_time)
         serializer = PollSerializer(polls, many=True)
         return Response(serializer.data)
 
@@ -63,6 +64,7 @@ class PollInfo(APIView):
 
     @swagger_auto_schema(responses={200: PollSerializer})
     def get(self, request, poll_pk=None):
-        poll = Poll.objects.get(pk=poll_pk)
+        queryset = Poll.objects.all()
+        poll = get_object_or_404(queryset, pk=poll_pk)
         serializer = PollSerializer(poll)
         return Response(serializer.data)
